@@ -17,6 +17,7 @@ import com.bgsoftware.superiorskyblock.api.enums.GeneratorHint;
 
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class WorldsSection extends SettingsContainerHolder implements SettingsManager.Worlds {
@@ -76,6 +77,7 @@ public class WorldsSection extends SettingsContainerHolder implements SettingsMa
 
         private final boolean isEnabled;
         private final GeneratorHint generatorHint;
+        private final int islandsHeight;
         private final boolean isUnlocked;
         private final boolean isSchematicOffset;
         private final String biome;
@@ -87,12 +89,13 @@ public class WorldsSection extends SettingsContainerHolder implements SettingsMa
             String generatorHintStr = section.getString("generator-hint", "VOID");
             GeneratorHint generatorHint;
             try {
-                generatorHint = GeneratorHint.valueOf(generatorHintStr.toUpperCase());
+                generatorHint = GeneratorHint.valueOf(generatorHintStr.toUpperCase(Locale.ENGLISH));
             } catch (Exception error) {
-                Log.warnFromFile("config.yml", "Invalid generator hint ", generatorHintStr, " - using VOID instead.");
-                generatorHint = GeneratorHint.VOID;
+                Log.warnFromFile("config.yml", "Invalid generator hint ", generatorHintStr, " - using CUSTOM instead.");
+                generatorHint = GeneratorHint.CUSTOM;
             }
             this.generatorHint = generatorHint;
+            this.islandsHeight = section.getInt("islands-height", 0);
             this.isUnlocked = section.getBoolean("unlock");
             this.isSchematicOffset = section.getBoolean("schematic-offset");
             this.biome = section.getString("biome");
@@ -163,6 +166,11 @@ public class WorldsSection extends SettingsContainerHolder implements SettingsMa
         @Override
         public GeneratorHint getGeneratorHint() {
             return this.generatorHint;
+        }
+
+        @Override
+        public int getIslandsHeight() {
+            return this.islandsHeight;
         }
 
         @Override

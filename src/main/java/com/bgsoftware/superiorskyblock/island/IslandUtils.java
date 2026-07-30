@@ -1,7 +1,9 @@
 package com.bgsoftware.superiorskyblock.island;
 
 import com.bgsoftware.superiorskyblock.SuperiorSkyblockPlugin;
+import com.bgsoftware.superiorskyblock.api.config.SettingsManager;
 import com.bgsoftware.superiorskyblock.api.enums.BorderColor;
+import com.bgsoftware.superiorskyblock.api.enums.GeneratorHint;
 import com.bgsoftware.superiorskyblock.api.enums.MemberRemoveReason;
 import com.bgsoftware.superiorskyblock.api.island.Island;
 import com.bgsoftware.superiorskyblock.api.island.IslandChunkFlags;
@@ -77,6 +79,20 @@ public class IslandUtils {
 
     private IslandUtils() {
 
+    }
+
+    public static boolean isUseVoidGenerator(World world) {
+        if (world == null)
+            return true;
+        Dimension dimension = plugin.getProviders().getWorldsProvider().getIslandsWorldDimension(world);
+        return isUseVoidGenerator(dimension);
+    }
+
+    public static boolean isUseVoidGenerator(Dimension dimension) {
+        if (dimension == null)
+            return true;
+        SettingsManager.Worlds.DimensionConfig dimensionConfig = plugin.getSettings().getWorlds().getDimensionConfig(dimension);
+        return dimensionConfig == null || dimensionConfig.getGeneratorHint() == GeneratorHint.VOID;
     }
 
     public static List<ChunkPosition> getChunkCoords(Island island, WorldInfo worldInfo, @IslandChunkFlags int flags) {

@@ -2,6 +2,7 @@ package com.bgsoftware.superiorskyblock.nms.v1_17;
 
 import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.superiorskyblock.SuperiorSkyblockPlugin;
+import com.bgsoftware.superiorskyblock.island.IslandUtils;
 import com.bgsoftware.superiorskyblock.core.ChunkPosition;
 import com.bgsoftware.superiorskyblock.core.threads.BukkitExecutor;
 import com.bgsoftware.superiorskyblock.core.CalculatedChunk;
@@ -142,7 +143,7 @@ public class NMSChunksImpl extends com.bgsoftware.superiorskyblock.nms.v1_17.Abs
                 unloadedChunk.put("TileEntities", tileEntities);
                 unloadedChunk.put("Entities", new ListTag());
 
-                if (!(serverLevel.generator instanceof IslandsGenerator)) {
+                if (!IslandUtils.isUseVoidGenerator(serverLevel.getWorld())) {
                     ChunkPos chunkPos = unloadedChunkCompound.chunkPos();
 
                     ProtoChunk protoChunk = NMSUtils.createProtoChunk(chunkPos, serverLevel);
@@ -296,7 +297,7 @@ public class NMSChunksImpl extends com.bgsoftware.superiorskyblock.nms.v1_17.Abs
 
         ChunkGenerator bukkitGenerator = serverLevel.getWorld().getGenerator();
 
-        if (bukkitGenerator != null && !(bukkitGenerator instanceof IslandsGenerator)) {
+        if (!IslandUtils.isUseVoidGenerator(serverLevel.getWorld())) {
             CustomChunkGenerator chunkGenerator = new CustomChunkGenerator(serverLevel,
                     serverLevel.getChunkSource().getGenerator(),
                     bukkitGenerator);

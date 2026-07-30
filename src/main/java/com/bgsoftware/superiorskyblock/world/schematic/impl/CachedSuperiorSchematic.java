@@ -1,10 +1,12 @@
 package com.bgsoftware.superiorskyblock.world.schematic.impl;
 
+import com.bgsoftware.superiorskyblock.api.config.SettingsManager;
 import com.bgsoftware.superiorskyblock.api.island.Island;
 import com.bgsoftware.superiorskyblock.api.key.Key;
 import com.bgsoftware.superiorskyblock.api.schematic.Schematic;
 import com.bgsoftware.superiorskyblock.api.world.Dimension;
 import com.bgsoftware.superiorskyblock.core.ChunkPosition;
+import com.bgsoftware.superiorskyblock.island.IslandUtils;
 import com.bgsoftware.superiorskyblock.core.collections.CollectionsFactory;
 import com.bgsoftware.superiorskyblock.core.collections.view.Int2ObjectMapView;
 import com.bgsoftware.superiorskyblock.core.key.map.KeyMaps;
@@ -37,7 +39,7 @@ public class CachedSuperiorSchematic extends BaseSchematic implements Schematic 
         super(baseSchematic.getName(), KeyMaps.createEmptyMap());
         this.baseSchematic = baseSchematic;
         this.schematicDimension = getSchematicDimension(baseSchematic.getName());
-        if (!(WorldGenerator.getWorldGenerator(this.schematicDimension) instanceof IslandsGenerator))
+        if (!IslandUtils.isUseVoidGenerator(this.schematicDimension))
             throw new IllegalStateException("Cannot use cached schematics with custom generators");
         populateCache();
     }
@@ -178,7 +180,10 @@ public class CachedSuperiorSchematic extends BaseSchematic implements Schematic 
     }
 
     private WorldEditSessionCache createSessionCache(int x, int z) {
-        Location location = new Location(null, x, plugin.getSettings().getIslandHeight() - 1, z);
+        SettingsManager.Worlds.DimensionConfig dimensionConfig = plugin.getSettings().getWorlds().getDimensionConfig(this.schematicDimension);
+        int islandsHeight = dimensionConfig != null && dimensionConfig.getIslandsHeight() > 0 ?
+                dimensionConfig.getIslandsHeight() : plugin.getSettings().getIslandHeight();
+        Location location = new Location(null, x, islandsHeight - 1, z);
         List<SchematicBlock> prePlaceTasks = new LinkedList<>();
         List<SchematicBlock> postPlaceTasks = new LinkedList<>();
 

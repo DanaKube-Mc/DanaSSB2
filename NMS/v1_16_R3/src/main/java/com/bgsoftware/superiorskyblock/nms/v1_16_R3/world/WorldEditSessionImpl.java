@@ -378,9 +378,11 @@ public class WorldEditSessionImpl implements WorldEditSession {
         }
 
         private void runCustomWorldGenerator(ProtoChunk tempChunk) {
-            ChunkGenerator bukkitGenerator = worldServer.getWorld().getGenerator();
+            if (IslandUtils.isUseVoidGenerator(worldServer.getWorld()))
+                return;
 
-            if (bukkitGenerator == null || bukkitGenerator instanceof IslandsGenerator)
+            ChunkGenerator bukkitGenerator = worldServer.getWorld().getGenerator();
+            if (bukkitGenerator == null)
                 return;
 
             CustomChunkGenerator chunkGenerator = new CustomChunkGenerator(worldServer,

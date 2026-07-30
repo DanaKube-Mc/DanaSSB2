@@ -3,6 +3,7 @@ package com.bgsoftware.superiorskyblock.island;
 import com.bgsoftware.common.annotations.Nullable;
 import com.bgsoftware.common.annotations.Size;
 import com.bgsoftware.superiorskyblock.SuperiorSkyblockPlugin;
+import com.bgsoftware.superiorskyblock.api.config.SettingsManager;
 import com.bgsoftware.superiorskyblock.api.data.DatabaseBridge;
 import com.bgsoftware.superiorskyblock.api.data.DatabaseBridgeMode;
 import com.bgsoftware.superiorskyblock.api.enums.MemberRemoveReason;
@@ -888,7 +889,11 @@ public class SIsland implements Island {
 
         Preconditions.checkNotNull(world, "Couldn't find world for dimension " + dimension + ".");
 
-        return this.center.toWorldPosition().toLocation(world);
+        SettingsManager.Worlds.DimensionConfig dimensionConfig = plugin.getSettings().getWorlds().getDimensionConfig(dimension);
+        int height = dimensionConfig != null && dimensionConfig.getIslandsHeight() > 0 ?
+                dimensionConfig.getIslandsHeight() : this.center.getY();
+
+        return new Location(world, this.center.getX() + 0.5, height, this.center.getZ() + 0.5);
     }
 
     @Override
@@ -917,7 +922,14 @@ public class SIsland implements Island {
 
         WorldPosition islandHome = islandHomes.readAndGet(islandHomes -> islandHomes.get(dimension));
 
-        return islandHome == null ? this.center.toWorldPosition() : islandHome;
+        if (islandHome != null)
+            return islandHome;
+
+        SettingsManager.Worlds.DimensionConfig dimensionConfig = plugin.getSettings().getWorlds().getDimensionConfig(dimension);
+        int height = dimensionConfig != null && dimensionConfig.getIslandsHeight() > 0 ?
+                dimensionConfig.getIslandsHeight() : this.center.getY();
+
+        return SWorldPosition.of(this.center.getX() + 0.5, height, this.center.getZ() + 0.5);
     }
 
     @Override

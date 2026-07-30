@@ -357,6 +357,8 @@ worlds:
       # A hint for the type of generator used for the world.
       # Supported values: VOID, CUSTOM
       generator-hint: VOID
+      # Custom islands height for this dimension. When 0, the global islands-height is used.
+      islands-height: 0
       # The default biome for the world.
       # If the biome is invalid, PLAINS will be set.
       biome: PLAINS
@@ -376,6 +378,8 @@ worlds:
       # A hint for the type of generator used for the world.
       # Supported values: VOID, CUSTOM
       generator-hint: VOID
+      # Custom islands height for this dimension. When 0, the global islands-height is used.
+      islands-height: 0
       # Should the schematics in this world will not be counted towards worth and level values?
       schematic-offset: true
       # The environment of this world
@@ -402,6 +406,8 @@ worlds:
       # A hint for the type of generator used for the world.
       # Supported values: VOID, CUSTOM
       generator-hint: VOID
+      # Custom islands height for this dimension. When 0, the global islands-height is used.
+      islands-height: 0
       # The default biome for the world.
       # If the biome is invalid, THE_END will be used.
       biome: THE_END

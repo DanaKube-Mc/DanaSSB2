@@ -1,9 +1,11 @@
 package com.bgsoftware.superiorskyblock.island.algorithm;
 
 import com.bgsoftware.superiorskyblock.SuperiorSkyblockPlugin;
+import com.bgsoftware.superiorskyblock.api.config.SettingsManager;
 import com.bgsoftware.superiorskyblock.api.data.DatabaseBridgeMode;
 import com.bgsoftware.superiorskyblock.api.island.Island;
 import com.bgsoftware.superiorskyblock.api.schematic.Schematic;
+import com.bgsoftware.superiorskyblock.api.world.Dimension;
 import com.bgsoftware.superiorskyblock.api.world.algorithm.IslandCreationAlgorithm;
 import com.bgsoftware.superiorskyblock.api.wrappers.BlockPosition;
 import com.bgsoftware.superiorskyblock.api.wrappers.SuperiorPlayer;
@@ -85,9 +87,14 @@ public class DefaultIslandCreationAlgorithm implements IslandCreationAlgorithm {
 
         long profiler = Profiler.start(ProfileType.CREATE_ISLAND, schematic.getName());
 
+        Dimension defaultDimension = plugin.getSettings().getWorlds().getDefaultWorldDimension();
+        SettingsManager.Worlds.DimensionConfig defaultDimConfig = plugin.getSettings().getWorlds().getDimensionConfig(defaultDimension);
+        int islandsHeight = defaultDimConfig != null && defaultDimConfig.getIslandsHeight() > 0 ?
+                defaultDimConfig.getIslandsHeight() : plugin.getSettings().getIslandHeight();
+
         Location islandLocation = plugin.getProviders().getWorldsProvider().getNextLocation(
                 lastIsland,
-                plugin.getSettings().getIslandHeight(),
+                islandsHeight,
                 plugin.getSettings().getMaxIslandSize(),
                 builder.owner.getUniqueId(),
                 builder.uuid

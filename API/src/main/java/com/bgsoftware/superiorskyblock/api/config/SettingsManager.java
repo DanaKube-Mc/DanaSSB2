@@ -1181,6 +1181,13 @@ public interface SettingsManager {
             GeneratorHint getGeneratorHint();
 
             /**
+             * Get the custom islands height for this dimension.
+             * If 0 or not set, the global islands-height will be used.
+             * Config-path: worlds.dimensions.<dimension>.islands-height
+             */
+            int getIslandsHeight();
+
+            /**
              * Whether this dimension is unlocked by default or not.
              * Config-path: worlds.dimensions.<dimension>.unlock
              */
