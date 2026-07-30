@@ -888,11 +888,7 @@ public class SIsland implements Island {
 
         Preconditions.checkNotNull(world, "Couldn't find world for dimension " + dimension + ".");
 
-        SettingsManager.Worlds.DimensionConfig dimensionConfig = plugin.getSettings().getWorlds().getDimensionConfig(dimension);
-        int height = dimensionConfig != null && dimensionConfig.getIslandsHeight() > 0 ?
-                dimensionConfig.getIslandsHeight() : this.center.getY();
-
-        return new Location(world, this.center.getX() + 0.5, height, this.center.getZ() + 0.5);
+        return this.center.toWorldPosition().toLocation(world);
     }
 
     @Override
@@ -921,14 +917,7 @@ public class SIsland implements Island {
 
         WorldPosition islandHome = islandHomes.readAndGet(islandHomes -> islandHomes.get(dimension));
 
-        if (islandHome != null)
-            return islandHome;
-
-        SettingsManager.Worlds.DimensionConfig dimensionConfig = plugin.getSettings().getWorlds().getDimensionConfig(dimension);
-        int height = dimensionConfig != null && dimensionConfig.getIslandsHeight() > 0 ?
-                dimensionConfig.getIslandsHeight() : this.center.getY();
-
-        return SWorldPosition.of(this.center.getX() + 0.5, height, this.center.getZ() + 0.5);
+        return islandHome == null ? this.center.toWorldPosition() : islandHome;
     }
 
     @Override
