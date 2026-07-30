@@ -76,6 +76,7 @@ public class WorldsSection extends SettingsContainerHolder implements SettingsMa
 
         private final boolean isEnabled;
         private final GeneratorHint generatorHint;
+        private final int islandsHeight;
         private final boolean isUnlocked;
         private final boolean isSchematicOffset;
         private final String biome;
@@ -93,6 +94,7 @@ public class WorldsSection extends SettingsContainerHolder implements SettingsMa
                 generatorHint = GeneratorHint.VOID;
             }
             this.generatorHint = generatorHint;
+            this.islandsHeight = section.getInt("islands-height", 0);
             this.isUnlocked = section.getBoolean("unlock");
             this.isSchematicOffset = section.getBoolean("schematic-offset");
             this.biome = section.getString("biome");
@@ -158,6 +160,11 @@ public class WorldsSection extends SettingsContainerHolder implements SettingsMa
         @Override
         public boolean isEnabled() {
             return this.isEnabled;
+        }
+
+        @Override
+        public int getIslandsHeight() {
+            return this.islandsHeight;
         }
 
         @Override

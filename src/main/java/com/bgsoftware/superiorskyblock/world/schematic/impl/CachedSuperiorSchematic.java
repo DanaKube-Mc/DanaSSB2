@@ -1,5 +1,6 @@
 package com.bgsoftware.superiorskyblock.world.schematic.impl;
 
+import com.bgsoftware.superiorskyblock.api.config.SettingsManager;
 import com.bgsoftware.superiorskyblock.api.island.Island;
 import com.bgsoftware.superiorskyblock.api.key.Key;
 import com.bgsoftware.superiorskyblock.api.schematic.Schematic;
@@ -178,7 +179,10 @@ public class CachedSuperiorSchematic extends BaseSchematic implements Schematic 
     }
 
     private WorldEditSessionCache createSessionCache(int x, int z) {
-        Location location = new Location(null, x, plugin.getSettings().getIslandHeight() - 1, z);
+        SettingsManager.Worlds.DimensionConfig dimensionConfig = plugin.getSettings().getWorlds().getDimensionConfig(this.schematicDimension);
+        int islandsHeight = dimensionConfig != null && dimensionConfig.getIslandsHeight() > 0 ?
+                dimensionConfig.getIslandsHeight() : plugin.getSettings().getIslandHeight();
+        Location location = new Location(null, x, islandsHeight - 1, z);
         List<SchematicBlock> prePlaceTasks = new LinkedList<>();
         List<SchematicBlock> postPlaceTasks = new LinkedList<>();
 
