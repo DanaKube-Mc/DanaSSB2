@@ -127,10 +127,11 @@ public class PluginEventsFactory {
         return fireEvent(ISLAND_BANK_WITHDRAW_EVENT, islandBankWithdraw);
     }
 
-    public static PluginEvent<IslandBiomeChange> callIslandBiomeChangeEvent(Island island, SuperiorPlayer superiorPlayer, Biome biome) {
+    public static PluginEvent<IslandBiomeChange> callIslandBiomeChangeEvent(Island island, SuperiorPlayer superiorPlayer, Dimension dimension, Biome biome) {
         IslandBiomeChange islandBiomeChange = new IslandBiomeChange();
         islandBiomeChange.island = island;
         islandBiomeChange.superiorPlayer = superiorPlayer;
+        islandBiomeChange.dimension = dimension;
         islandBiomeChange.biome = biome;
         return fireEvent(ISLAND_BIOME_CHANGE_EVENT, islandBiomeChange);
     }
@@ -427,10 +428,11 @@ public class PluginEventsFactory {
         return !fireEvent(ISLAND_CHANGE_ROLE_PRIVILEGE_EVENT, islandChangeRolePrivilege).isCancelled();
     }
 
-    public static PluginEvent<IslandChat> callIslandChatEvent(Island island, SuperiorPlayer superiorPlayer, String message) {
+    public static PluginEvent<IslandChat> callIslandChatEvent(Island island, SuperiorPlayer superiorPlayer, ChatState chatState, String message) {
         IslandChat islandChat = new IslandChat();
         islandChat.island = island;
         islandChat.superiorPlayer = superiorPlayer;
+        islandChat.chatState = chatState;
         islandChat.message = message;
         return fireEvent(ISLAND_CHAT_EVENT, islandChat);
     }
@@ -935,20 +937,20 @@ public class PluginEventsFactory {
                                                                     Upgrade upgrade, UpgradeLevel currentLevel,
                                                                     UpgradeLevel nextLevel, IslandUpgradeEvent.Cause upgradeCause) {
         return callIslandUpgradeEvent(island, superiorPlayer, upgrade, nextLevel, currentLevel.getCommands(),
-                upgradeCause, currentLevel.getCost());
+                upgradeCause, currentLevel.getCosts());
     }
 
     public static PluginEvent<IslandUpgrade> callIslandUpgradeEvent(Island island, CommandSender commandSender,
                                                                     Upgrade upgrade, UpgradeLevel nextLevel,
                                                                     IslandUpgradeEvent.Cause upgradeCause) {
         return callIslandUpgradeEvent(island, commandSenderToSuperiorPlayer(commandSender), upgrade, nextLevel,
-                Collections.emptyList(), upgradeCause, null);
+                Collections.emptyList(), upgradeCause, Collections.emptyList());
     }
 
     public static PluginEvent<IslandUpgrade> callIslandUpgradeEvent(Island island, @Nullable SuperiorPlayer superiorPlayer,
                                                                     Upgrade upgrade, UpgradeLevel nextLevel,
                                                                     List<String> commands, IslandUpgradeEvent.Cause upgradeCause,
-                                                                    @Nullable UpgradeCost upgradeCost) {
+                                                                    List<UpgradeCost> upgradeCosts) {
         IslandUpgrade islandUpgrade = new IslandUpgrade();
         islandUpgrade.island = island;
         islandUpgrade.superiorPlayer = superiorPlayer;
@@ -956,7 +958,7 @@ public class PluginEventsFactory {
         islandUpgrade.nextLevel = nextLevel;
         islandUpgrade.commands = commands;
         islandUpgrade.upgradeCause = upgradeCause;
-        islandUpgrade.upgradeCost = upgradeCost;
+        islandUpgrade.upgradeCosts = upgradeCosts;
         return fireEvent(ISLAND_UPGRADE_EVENT, islandUpgrade);
     }
 

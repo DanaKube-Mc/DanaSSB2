@@ -93,6 +93,7 @@ public class PluginEventArgs {
 
     public static class IslandBiomeChange extends IslandDoActionArgs {
 
+        public Dimension dimension;
         public Biome biome;
 
     }
@@ -253,6 +254,7 @@ public class PluginEventArgs {
 
     public static class IslandChat extends IslandDoActionArgs {
 
+        public ChatState chatState;
         public String message;
 
     }
@@ -548,7 +550,7 @@ public class PluginEventArgs {
         public UpgradeLevel nextLevel;
         public List<String> commands;
         public IslandUpgradeEvent.Cause upgradeCause;
-        public UpgradeCost upgradeCost;
+        public List<UpgradeCost> upgradeCosts;
 
     }
 

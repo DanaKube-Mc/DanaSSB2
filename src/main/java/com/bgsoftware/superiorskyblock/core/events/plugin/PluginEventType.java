@@ -314,7 +314,7 @@ public abstract class PluginEventType<Args extends PluginEventArgs> extends Even
     public static final PluginEventType<IslandBiomeChange> ISLAND_BIOME_CHANGE_EVENT = new PluginEventType<IslandBiomeChange>(IslandBiomeChangeEvent.class) {
         @Override
         public Event createBukkitEvent(IslandBiomeChange args) {
-            return new IslandBiomeChangeEvent(args.superiorPlayer, args.island, args.biome);
+            return new IslandBiomeChangeEvent(args.superiorPlayer, args.island, args.dimension, args.biome);
         }
 
         @Override
@@ -602,7 +602,7 @@ public abstract class PluginEventType<Args extends PluginEventArgs> extends Even
     public static final PluginEventType<IslandChat> ISLAND_CHAT_EVENT = new PluginEventType<IslandChat>(IslandChatEvent.class) {
         @Override
         public Event createBukkitEvent(IslandChat args) {
-            return new IslandChatEvent(args.island, args.superiorPlayer, args.message);
+            return new IslandChatEvent(args.island, args.superiorPlayer, args.chatState, args.message);
         }
 
         @Override
@@ -997,14 +997,14 @@ public abstract class PluginEventType<Args extends PluginEventArgs> extends Even
         @Override
         public Event createBukkitEvent(IslandUpgrade args) {
             return new IslandUpgradeEvent(args.superiorPlayer, args.island, args.upgrade, args.nextLevel, args.commands,
-                    args.upgradeCause, args.upgradeCost);
+                    args.upgradeCause, args.upgradeCosts);
         }
 
         @Override
         public void applyBukkitToPluginEvent(Event bukkitEvent, PluginEvent<IslandUpgrade> pluginEvent) {
             super.applyBukkitToPluginEvent(bukkitEvent, pluginEvent);
             pluginEvent.getArgs().commands = ((IslandUpgradeEvent) bukkitEvent).getCommands();
-            pluginEvent.getArgs().upgradeCost = ((IslandUpgradeEvent) bukkitEvent).getUpgradeCost();
+            pluginEvent.getArgs().upgradeCosts = ((IslandUpgradeEvent) bukkitEvent).getUpgradeCosts();
         }
     };
     public static final PluginEventType<IslandVisitorHomeTeleport> ISLAND_VISITOR_HOME_TELEPORT_EVENT = new PluginEventType<IslandVisitorHomeTeleport>(IslandVisitorHomeTeleportEvent.class) {

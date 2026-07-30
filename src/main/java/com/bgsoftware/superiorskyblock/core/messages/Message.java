@@ -20,7 +20,7 @@ import com.bgsoftware.superiorskyblock.core.io.Files;
 import com.bgsoftware.superiorskyblock.core.logging.Debug;
 import com.bgsoftware.superiorskyblock.core.logging.Log;
 import com.bgsoftware.superiorskyblock.player.PlayerLocales;
-import com.bgsoftware.superiorskyblock.service.message.MessagesServiceImpl;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -29,7 +29,6 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -786,6 +785,7 @@ public enum Message {
     WITHDRAW_ANNOUNCEMENT,
     WITHDRAW_ERROR,
     WORLD_NOT_ENABLED,
+    WORLD_NOT_GENERATED,
     WORLD_NOT_UNLOCKED,
 
     CUSTOM(true) {
@@ -802,15 +802,9 @@ public enum Message {
                 message = Formatters.COLOR_FORMATTER.format(message);
             }
 
-            for (MessagesServiceImpl.CustomComponentParser parser : messagesService.get().getCustomComponentParsers()) {
-                Optional<IMessageComponent> component = parser.parseRawMessage(message);
-                if (component.isPresent()) {
-                    component.get().sendMessage(sender);
-                    return;
-                }
-            }
-
-            sender.sendMessage(message);
+            MessagesService.Builder builder = messagesService.get().newBuilder();
+            builder.addRawMessage(message);
+            builder.build().sendMessage(sender);
         }
 
     };
@@ -819,10 +813,10 @@ public enum Message {
     private static final Object[] EMPTY_ARGS = new Object[0];
 
     private static final SuperiorSkyblockPlugin plugin = SuperiorSkyblockPlugin.getPlugin();
-    private static final LazyReference<MessagesServiceImpl> messagesService = new LazyReference<MessagesServiceImpl>() {
+    private static final LazyReference<MessagesService> messagesService = new LazyReference<MessagesService>() {
         @Override
-        protected MessagesServiceImpl create() {
-            return (MessagesServiceImpl) plugin.getServices().getService(MessagesService.class);
+        protected MessagesService create() {
+            return plugin.getServices().getService(MessagesService.class);
         }
     };
 
@@ -945,6 +939,18 @@ public enum Message {
     @Nullable
     public String getMessage(Locale locale, Object... args) {
         return isEmpty(locale) ? defaultMessage : messages.get(locale).getMessage(args);
+    }
+
+    public final void sendPlayerOrConsole(@Nullable SuperiorPlayer superiorPlayer) {
+        sendPlayerOrConsole(superiorPlayer, EMPTY_ARGS);
+    }
+
+    public final void sendPlayerOrConsole(@Nullable SuperiorPlayer superiorPlayer, Object... args) {
+        if (superiorPlayer == null) {
+            send(Bukkit.getConsoleSender(), args);
+        } else {
+            send(superiorPlayer, args);
+        }
     }
 
     public final void send(SuperiorPlayer superiorPlayer) {

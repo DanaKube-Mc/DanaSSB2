@@ -17,6 +17,7 @@ import com.bgsoftware.superiorskyblock.core.events.plugin.PluginEventsFactory;
 import com.bgsoftware.superiorskyblock.core.formatting.Formatters;
 import com.bgsoftware.superiorskyblock.core.formatting.impl.ChatFormatter;
 import com.bgsoftware.superiorskyblock.core.logging.Log;
+import com.bgsoftware.superiorskyblock.core.menu.dialog.DialogWrapper;
 import com.bgsoftware.superiorskyblock.core.messages.Message;
 import com.bgsoftware.superiorskyblock.core.threads.BukkitExecutor;
 import com.bgsoftware.superiorskyblock.island.IslandChat;
@@ -218,6 +219,11 @@ public class PlayersListener extends AbstractGameEventListener {
 
         // Remove all player chat-listeners
         PlayerChat.remove(player);
+
+        // Destroy current opened dialog
+        DialogWrapper<?> dialog = DialogWrapper.getByPlayer(player.getUniqueId());
+        if (dialog != null)
+            dialog.onCloseDialog();
     }
 
     private void onPlayerGameModeChange(GameEvent<GameEventArgs.PlayerGamemodeChangeEvent> e) {
@@ -414,7 +420,7 @@ public class PlayersListener extends AbstractGameEventListener {
 
             e.setCancelled();
 
-            IslandChat.handleIslandChat(island, superiorPlayer, e.getArgs().message);
+            IslandChat.handleIslandChat(island, superiorPlayer, ChatStates.LOCAL_CHAT, e.getArgs().message);
         } else if (superiorPlayer.getChatState() == ChatStates.TEAM_CHAT) {
             Island island = superiorPlayer.getIsland();
 
@@ -429,7 +435,7 @@ public class PlayersListener extends AbstractGameEventListener {
 
             e.setCancelled();
 
-            IslandChat.handleIslandChat(island, superiorPlayer, e.getArgs().message);
+            IslandChat.handleIslandChat(island, superiorPlayer, ChatStates.TEAM_CHAT, e.getArgs().message);
         } else if (e.getArgs().format != null) {
             e.getArgs().format = Formatters.CHAT_FORMATTER.format(
                     new ChatFormatter.ChatFormatArgs(e.getArgs().format, superiorPlayer, superiorPlayer.getIsland()));
