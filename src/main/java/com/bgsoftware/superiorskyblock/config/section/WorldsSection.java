@@ -17,6 +17,7 @@ import com.bgsoftware.superiorskyblock.api.enums.GeneratorHint;
 
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class WorldsSection extends SettingsContainerHolder implements SettingsManager.Worlds {
@@ -87,10 +88,10 @@ public class WorldsSection extends SettingsContainerHolder implements SettingsMa
             String generatorHintStr = section.getString("generator-hint", "VOID");
             GeneratorHint generatorHint;
             try {
-                generatorHint = GeneratorHint.valueOf(generatorHintStr.toUpperCase());
+                generatorHint = GeneratorHint.valueOf(generatorHintStr.toUpperCase(Locale.ENGLISH));
             } catch (Exception error) {
-                Log.warnFromFile("config.yml", "Invalid generator hint ", generatorHintStr, " - using VOID instead.");
-                generatorHint = GeneratorHint.VOID;
+                Log.warnFromFile("config.yml", "Invalid generator hint ", generatorHintStr, " - using CUSTOM instead.");
+                generatorHint = GeneratorHint.CUSTOM;
             }
             this.generatorHint = generatorHint;
             this.isUnlocked = section.getBoolean("unlock");

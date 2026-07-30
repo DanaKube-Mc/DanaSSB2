@@ -1,6 +1,7 @@
 package com.bgsoftware.superiorskyblock.nms.v1_21;
 
 import com.bgsoftware.superiorskyblock.SuperiorSkyblockPlugin;
+import com.bgsoftware.superiorskyblock.island.IslandUtils;
 import com.bgsoftware.superiorskyblock.core.CalculatedChunk;
 import com.bgsoftware.superiorskyblock.core.ChunkPosition;
 import com.bgsoftware.superiorskyblock.core.collections.Chunk2ObjectMap;
@@ -164,7 +165,7 @@ public class NMSChunksImpl extends com.bgsoftware.superiorskyblock.nms.v1_21.Abs
                 chunkCompound.put("Entities", new ListTag());
                 chunkCompound.put("block_entities", tileEntities);
 
-                if (serverLevel.generator instanceof IslandsGenerator) {
+                if (IslandUtils.isUseVoidGenerator(serverLevel.getWorld())) {
                     PalettedContainer<BlockState> statesContainer = new PalettedContainer<>(Block.BLOCK_STATE_REGISTRY,
                             Blocks.AIR.defaultBlockState(), PalettedContainer.Strategy.SECTION_STATES);
                     DataResult<Tag> dataResult = blocksCodec.encodeStart(NbtOps.INSTANCE, statesContainer);
@@ -376,7 +377,7 @@ public class NMSChunksImpl extends com.bgsoftware.superiorskyblock.nms.v1_21.Abs
         ServerLevel serverLevel = ((LevelChunk) chunk).level;
         ChunkGenerator bukkitGenerator = serverLevel.getWorld().getGenerator();
 
-        if (bukkitGenerator == null || bukkitGenerator instanceof IslandsGenerator)
+        if (IslandUtils.isUseVoidGenerator(serverLevel.getWorld()))
             return;
 
         NMSUtilsVersioned.buildSurfaceForChunk(serverLevel, bukkitGenerator, chunk);

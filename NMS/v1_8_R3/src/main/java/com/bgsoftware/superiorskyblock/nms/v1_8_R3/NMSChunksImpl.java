@@ -2,6 +2,7 @@ package com.bgsoftware.superiorskyblock.nms.v1_8_R3;
 
 import com.bgsoftware.common.annotations.Nullable;
 import com.bgsoftware.superiorskyblock.SuperiorSkyblockPlugin;
+import com.bgsoftware.superiorskyblock.island.IslandUtils;
 import com.bgsoftware.superiorskyblock.api.island.Island;
 import com.bgsoftware.superiorskyblock.api.key.Key;
 import com.bgsoftware.superiorskyblock.api.key.KeyMap;
@@ -322,7 +323,7 @@ public class NMSChunksImpl implements NMSChunks {
     private static void removeBlocks(Chunk chunk) {
         WorldServer worldServer = (WorldServer) chunk.world;
 
-        if (worldServer.generator != null && !(worldServer.generator instanceof IslandsGenerator)) {
+        if (!IslandUtils.isUseVoidGenerator(worldServer.getWorld())) {
             CustomChunkGenerator customChunkGenerator = new CustomChunkGenerator(worldServer, 0L, worldServer.generator);
             Chunk generatedChunk = customChunkGenerator.getOrCreateChunk(chunk.locX, chunk.locZ);
 
