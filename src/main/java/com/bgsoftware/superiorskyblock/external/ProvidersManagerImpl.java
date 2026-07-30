@@ -43,8 +43,8 @@ import com.bgsoftware.superiorskyblock.external.bossbar.BossBarProvider_Default;
 import com.bgsoftware.superiorskyblock.external.chunks.ChunksProvider_Default;
 import com.bgsoftware.superiorskyblock.external.economy.EconomyProvider_Default;
 import com.bgsoftware.superiorskyblock.external.menus.MenusProvider_Default;
-import com.bgsoftware.superiorskyblock.external.messages.MessagesProvider;
-import com.bgsoftware.superiorskyblock.external.messages.MessagesProvider_Default;
+import com.bgsoftware.superiorskyblock.external.ui.UIProvider;
+import com.bgsoftware.superiorskyblock.external.ui.UIProvider_Default;
 import com.bgsoftware.superiorskyblock.external.permissions.PermissionsProvider_Default;
 import com.bgsoftware.superiorskyblock.external.placeholders.PlaceholdersProvider;
 import com.bgsoftware.superiorskyblock.external.prices.PricesProvider_Default;
@@ -87,7 +87,7 @@ public class ProvidersManagerImpl extends Manager implements ProvidersManager {
     private StackedBlocksProvider stackedBlocksProvider = new StackedBlocksProvider_Default();
     private EconomyProvider economyProvider = new EconomyProvider_Default();
     private EconomyProvider bankEconomyProvider = new EconomyProvider_Default();
-    private MessagesProvider messagesProvider = new MessagesProvider_Default();
+    private UIProvider uiProvider = new UIProvider_Default();
     private BossBarProvider bossBarsProvider = new BossBarProvider_Default();
     private PermissionsProvider permissionsProvider = new PermissionsProvider_Default();
     private PricesProvider pricesProvider = new PricesProvider_Default();
@@ -137,7 +137,7 @@ public class ProvidersManagerImpl extends Manager implements ProvidersManager {
             registerChunksProvider();
         });
 
-        registerMessagesProvider();
+        registerUIProvider();
         registerBossBarProvider();
 
         // We try to forcefully load prices after a second the server has enabled.
@@ -319,12 +319,12 @@ public class ProvidersManagerImpl extends Manager implements ProvidersManager {
         this.stackedBlocksListeners.remove(stackedBlocksListener);
     }
 
-    public MessagesProvider getMessagesProvider() {
-        return messagesProvider;
+    public UIProvider getUIProvider() {
+        return uiProvider;
     }
 
-    public void setMessagesProvider(MessagesProvider messagesProvider) {
-        this.messagesProvider = messagesProvider;
+    public void setUIProvider(UIProvider uiProvider) {
+        this.uiProvider = uiProvider;
     }
 
     public BossBarProvider getBossBarProvider() {
@@ -632,14 +632,14 @@ public class ProvidersManagerImpl extends Manager implements ProvidersManager {
         }
     }
 
-    private void registerMessagesProvider() {
-        Optional<MessagesProvider> messagesProvider = Optional.empty();
+    private void registerUIProvider() {
+        Optional<UIProvider> uiProvider = Optional.empty();
 
         if (isHookEnabled("MiniMessage") && hasMiniMessageSupport()) {
-            messagesProvider = createInstance("messages.MessagesProvider_MiniMessage");
+            uiProvider = createInstance("ui.UIProvider_MiniMessage");
         }
 
-        messagesProvider.ifPresent(this::setMessagesProvider);
+        uiProvider.ifPresent(this::setUIProvider);
     }
 
     private void registerBossBarProvider() {
@@ -663,8 +663,13 @@ public class ProvidersManagerImpl extends Manager implements ProvidersManager {
     }
 
     private void registerPricesProvider() {
-        ShopsProvider.SHOPGUIPLUS.createInstance(plugin)
-                .map(shopsBridge -> new PricesProvider_ShopsBridgeWrapper(plugin, ShopsProvider.SHOPGUIPLUS, shopsBridge))
+        String pricesProviderName = plugin.getSettings().getPricesProvider();
+
+        Optional<ShopsProvider> shopsProvider = (pricesProviderName.equalsIgnoreCase("AUTO") ?
+                ShopsProvider.findAvailableProvider() : ShopsProvider.getShopsProvider(pricesProviderName));
+
+        shopsProvider.flatMap(provider -> provider.createInstance(plugin)
+                .map(shopsBridge -> new PricesProvider_ShopsBridgeWrapper(plugin, provider, shopsBridge)))
                 .ifPresent(this::setPricesProvider);
     }
 

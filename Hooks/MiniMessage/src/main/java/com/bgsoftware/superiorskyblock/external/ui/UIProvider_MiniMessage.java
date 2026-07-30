@@ -1,4 +1,4 @@
-package com.bgsoftware.superiorskyblock.external.messages;
+package com.bgsoftware.superiorskyblock.external.ui;
 
 import com.bgsoftware.common.annotations.Nullable;
 import com.bgsoftware.common.reflection.ClassInfo;
@@ -8,6 +8,7 @@ import com.bgsoftware.superiorskyblock.SuperiorSkyblockPlugin;
 import com.bgsoftware.superiorskyblock.api.objects.Pair;
 import com.bgsoftware.superiorskyblock.api.service.message.IMessageComponent;
 import com.bgsoftware.superiorskyblock.core.LazyReference;
+import com.bgsoftware.superiorskyblock.core.SequentialListBuilder;
 import com.bgsoftware.superiorskyblock.core.ServerVersion;
 import com.bgsoftware.superiorskyblock.core.Text;
 import com.bgsoftware.superiorskyblock.core.logging.Log;
@@ -16,6 +17,7 @@ import com.bgsoftware.superiorskyblock.core.messages.component.EmptyMessageCompo
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.ParsingException;
 import net.kyori.adventure.text.minimessage.tag.standard.StandardTags;
@@ -23,22 +25,26 @@ import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.title.Title;
 import net.md_5.bungee.api.chat.BaseComponent;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
 
-public class MessagesProvider_MiniMessage extends BaseMessagesProvider {
+public class UIProvider_MiniMessage extends BaseUIProvider {
 
     // Adventure 5.x renamed the Title.Times factory method from 'of' to 'times',
     // breaking binary compatibility with Adventure 4.x. Resolve the method
     // reflectively so a single build works on both versions.
     private static final ReflectMethod<Title.Times> TITLE_TIMES_FACTORY = getTitleTimesFactory();
-    private static final ReflectMethod<ClickEvent> CLICK_EVENT_CREATE = initializeClickEventCreation();
-    private static final ReflectMethod<Object> CLICK_EVENT_PAYLOAD_TEXT = new ReflectMethod<>(
-            new ClassInfo("net.kyori.adventure.text.event.ClickEvent$Payload", ClassInfo.PackageType.UNKNOWN),
-            "string", String.class);
+    private static final ClickEventCreator CLICK_EVENT_CREATE = initializeClickEventCreation();
 
     private static final ClickEvent.Action RUN_COMMAND_CLICK_EVENT = getClickEvent("RUN_COMMAND");
     private static final ClickEvent.Action SUGGEST_COMMAND_CLICK_EVENT = getClickEvent("SUGGEST_COMMAND");
@@ -52,8 +58,8 @@ public class MessagesProvider_MiniMessage extends BaseMessagesProvider {
         }
     };
 
-    public MessagesProvider_MiniMessage(SuperiorSkyblockPlugin plugin) {
-        Log.info("Using MiniMessage as a messages provider.");
+    public UIProvider_MiniMessage(SuperiorSkyblockPlugin plugin) {
+        Log.info("Using MiniMessage as a ui provider.");
     }
 
     @Override
@@ -99,6 +105,47 @@ public class MessagesProvider_MiniMessage extends BaseMessagesProvider {
         return TitleComponent.of(titleMessage, subtitleMessage, fadeIn, stay, fadeOut);
     }
 
+    @Override
+    public void setItemMetaDisplayName(ItemMeta itemMeta, String displayName) {
+        itemMeta.displayName(deserializeWithoutItalic(displayName));
+    }
+
+    @Override
+    public void setItemMetaLore(ItemMeta itemMeta, List<String> lore) {
+        itemMeta.lore(new SequentialListBuilder<Component>().build(lore, UIProvider_MiniMessage::deserializeWithoutItalic));
+    }
+
+    @Override
+    public Inventory createInventory(InventoryHolder inventoryHolder, InventoryType inventoryType, String title) {
+        return Bukkit.createInventory(inventoryHolder, inventoryType, deserializeWithoutItalic(title));
+    }
+
+    @Override
+    public Inventory createInventory(InventoryHolder inventoryHolder, int size, String title) {
+        return Bukkit.createInventory(inventoryHolder, size, deserializeWithoutItalic(title));
+    }
+
+    private static Component deserializeWithoutItalic(String message) {
+        Component component = deserialize(message, message.indexOf(ChatColor.COLOR_CHAR) >= 0);
+        if (component.decoration(TextDecoration.ITALIC) == TextDecoration.State.NOT_SET) {
+            component = component.decoration(TextDecoration.ITALIC, false);
+        }
+
+        return component;
+    }
+
+    private static Component deserialize(String message, boolean legacyColorCodes) {
+        if (legacyColorCodes) {
+            return LEGACY_COMPONENT_SERIALIZER.deserialize(message);
+        }
+
+        try {
+            return MINI_MESSAGE.deserialize(message);
+        } catch (ParsingException exception) {
+            return LEGACY_COMPONENT_SERIALIZER.deserialize(message);
+        }
+    }
+
     private static ReflectMethod<Title.Times> getTitleTimesFactory() {
         ReflectMethod<Title.Times> method = new ReflectMethod<>(Title.Times.class, "times",
                 Duration.class, Duration.class, Duration.class);
@@ -122,18 +169,6 @@ public class MessagesProvider_MiniMessage extends BaseMessagesProvider {
                 Duration.ofMillis(stay * 50L), Duration.ofMillis(fadeOut * 50L));
     }
 
-    private static Component deserialize(String message, boolean legacyColorCodes) {
-        if (legacyColorCodes) {
-            return LEGACY_COMPONENT_SERIALIZER.deserialize(message);
-        }
-
-        try {
-            return MINI_MESSAGE.deserialize(message);
-        } catch (ParsingException exception) {
-            return LEGACY_COMPONENT_SERIALIZER.deserialize(message);
-        }
-    }
-
     private static ClickEvent.Action getClickEvent(String name) {
         if (ClickEvent.Action.class.isAssignableFrom(Enum.class)) {
             return ClickEvent.Action.valueOf(name);
@@ -144,17 +179,37 @@ public class MessagesProvider_MiniMessage extends BaseMessagesProvider {
         }
     }
 
-    private static ReflectMethod<ClickEvent> initializeClickEventCreation() {
-        ReflectMethod<ClickEvent> CREATE_METHOD = new ReflectMethod<>(
+    private static ClickEventCreator initializeClickEventCreation() {
+        ReflectMethod<ClickEvent> STRING_CREATE_METHOD = new ReflectMethod<>(
                 ClickEvent.class, "clickEvent", ClickEvent.Action.class, String.class);
 
-        if (!CREATE_METHOD.isValid()) {
-            CREATE_METHOD = new ReflectMethod<>(
-                    ClickEvent.class, "clickEvent", new ClassInfo(ClickEvent.Action.class),
-                    new ClassInfo("net.kyori.adventure.text.event.ClickEvent$Payload", ClassInfo.PackageType.UNKNOWN));
+        if (STRING_CREATE_METHOD.isValid()) {
+            return (action, payload) -> {
+                return STRING_CREATE_METHOD.invoke(null, action, payload);
+            };
         }
 
-        return CREATE_METHOD;
+        ReflectMethod<ClickEvent> PAYLOAD_CREATE_METHOD = new ReflectMethod<>(
+                ClickEvent.class, "clickEvent", new ClassInfo(ClickEvent.Action.class),
+                new ClassInfo("net.kyori.adventure.text.event.ClickEvent$Payload", ClassInfo.PackageType.UNKNOWN));
+        ReflectMethod<Object> CLICK_EVENT_PAYLOAD_TEXT = new ReflectMethod<>(
+                new ClassInfo("net.kyori.adventure.text.event.ClickEvent$Payload", ClassInfo.PackageType.UNKNOWN),
+                "string", String.class);
+
+        if (PAYLOAD_CREATE_METHOD.isValid() && CLICK_EVENT_PAYLOAD_TEXT.isValid()) {
+            return (action, payload) -> {
+                Object textPayload = CLICK_EVENT_PAYLOAD_TEXT.invoke(null, payload);
+                return PAYLOAD_CREATE_METHOD.invoke(null, action, textPayload);
+            };
+        }
+
+        throw new IllegalStateException("Cannot find valid ClickEvent creator");
+    }
+
+    private interface ClickEventCreator {
+
+        ClickEvent create(ClickEvent.Action action, String payload);
+
     }
 
     private static class ActionBarComponent extends BaseMessageComponent {
@@ -239,9 +294,7 @@ public class MessagesProvider_MiniMessage extends BaseMessagesProvider {
                 if (this.clickEvent.isPresent()) {
                     Optional<String> clickEventDataOpt = this.clickEvent.get().getValue().getContent(player, args);
                     if (clickEventDataOpt.isPresent()) {
-                        Object payload = CLICK_EVENT_PAYLOAD_TEXT.isValid() ?
-                                CLICK_EVENT_PAYLOAD_TEXT.invoke(null, clickEventDataOpt.get()) : clickEventDataOpt.get();
-                        component = component.clickEvent(CLICK_EVENT_CREATE.invoke(null, this.clickEvent.get().getKey(), payload));
+                        component = component.clickEvent(CLICK_EVENT_CREATE.create(this.clickEvent.get().getKey(), clickEventDataOpt.get()));
                     }
                 }
 
