@@ -154,7 +154,7 @@ public class EnumerateMap<K extends Enumerable, V> {
     }
 
     private boolean isValidKey(K key) {
-        return key.ordinal() >= 0 && key.ordinal() < this.values.length;
+        return key != null && key.ordinal() >= 0 && key.ordinal() < this.values.length;
     }
 
     private void ensureCapacity(int capacity) {

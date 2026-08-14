@@ -200,7 +200,12 @@ public class EntityTeleports {
 
                 for (int x = 0; x < 16; x++) {
                     for (int z = 0; z < 16; z++) {
-                        int y = chunkSnapshot.getHighestBlockYAt(x, z);
+                        int y;
+                        try {
+                            y = chunkSnapshot.getHighestBlockYAt(x, z);
+                        } catch (IllegalArgumentException ex) {
+                            continue;
+                        }
 
                         if (y - 1 <= worldMinLimit || y + 1 >= worldBuildLimit)
                             continue;

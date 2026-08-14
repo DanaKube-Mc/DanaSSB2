@@ -175,7 +175,11 @@ public class SpawnIsland implements Island {
 
         this.center = SWorldPosition.of(centerLocation);
         this.islandArea.update(this.center.toBlockPosition(), this.islandSize);
-        this.spawnWorldInfo = new WorldInfoImpl(this.spawnWorld.getName(), Dimensions.fromEnvironment(this.spawnWorld.getEnvironment()));
+        Dimension spawnDimension = Dimensions.fromEnvironment(this.spawnWorld.getEnvironment());
+        if (spawnDimension == null) {
+            spawnDimension = plugin.getSettings().getWorlds().getDefaultWorldDimension();
+        }
+        this.spawnWorldInfo = new WorldInfoImpl(this.spawnWorld.getName(), spawnDimension);
 
         this.dirtyChunksContainer = new DirtyChunksContainer(this);
 

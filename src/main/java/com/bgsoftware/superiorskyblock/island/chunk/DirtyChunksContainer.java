@@ -59,7 +59,12 @@ public class DirtyChunksContainer {
         if (chunkIndex < 0)
             throw new IllegalStateException("Chunk is not inside island boundaries: " + chunkPosition);
 
-        BitSet dirtyChunksBitset = this.dirtyChunks.get(chunkPosition.getWorldsInfo().getDimension());
+        WorldInfo worldInfo = chunkPosition.getWorldsInfo();
+        Dimension dimension = worldInfo != null ? worldInfo.getDimension() : null;
+        if (dimension == null)
+            return false;
+
+        BitSet dirtyChunksBitset = this.dirtyChunks.get(dimension);
 
         return dirtyChunksBitset != null && !dirtyChunksBitset.isEmpty() && dirtyChunksBitset.get(chunkIndex);
     }
@@ -70,7 +75,12 @@ public class DirtyChunksContainer {
         if (chunkIndex < 0)
             throw new IllegalStateException("Chunk is not inside island boundaries: " + chunkPosition);
 
-        BitSet dirtyChunksBitset = this.dirtyChunks.get(chunkPosition.getWorldsInfo().getDimension());
+        WorldInfo worldInfo = chunkPosition.getWorldsInfo();
+        Dimension dimension = worldInfo != null ? worldInfo.getDimension() : null;
+        if (dimension == null)
+            return;
+
+        BitSet dirtyChunksBitset = this.dirtyChunks.get(dimension);
 
         boolean isMarkedDirty = dirtyChunksBitset != null && !dirtyChunksBitset.isEmpty() && dirtyChunksBitset.get(chunkIndex);
 
@@ -87,7 +97,12 @@ public class DirtyChunksContainer {
         if (chunkIndex < 0)
             throw new IllegalStateException("Chunk is not inside island boundaries: " + chunkPosition);
 
-        BitSet dirtyChunksBitset = this.dirtyChunks.computeIfAbsent(chunkPosition.getWorldsInfo().getDimension(),
+        WorldInfo worldInfo = chunkPosition.getWorldsInfo();
+        Dimension dimension = worldInfo != null ? worldInfo.getDimension() : null;
+        if (dimension == null)
+            return;
+
+        BitSet dirtyChunksBitset = this.dirtyChunks.computeIfAbsent(dimension,
                 e -> new BitSet(this.totalChunksCount));
 
         boolean isMarkedDirty = !dirtyChunksBitset.isEmpty() && dirtyChunksBitset.get(chunkIndex);

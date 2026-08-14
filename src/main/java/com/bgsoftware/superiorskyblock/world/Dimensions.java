@@ -28,7 +28,20 @@ public class Dimensions {
 
     @Nullable
     public static Dimension fromEnvironment(World.Environment environment) {
-        return ENVIRONMENT_TO_DIMENSION.get(environment);
+        if (environment == null)
+            return null;
+
+        Dimension dimension = ENVIRONMENT_TO_DIMENSION.get(environment);
+        if (dimension != null)
+            return dimension;
+
+        for (Dimension d : Dimension.values()) {
+            if (d.getEnvironment() == environment) {
+                return d;
+            }
+        }
+
+        return null;
     }
 
     private Dimensions() {

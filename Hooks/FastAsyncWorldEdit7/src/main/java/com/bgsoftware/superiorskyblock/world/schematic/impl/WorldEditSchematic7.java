@@ -64,7 +64,7 @@ public class WorldEditSchematic7 extends BaseSchematic implements Schematic {
             Operation operation = new ClipboardHolder(clipboard)
                     .createPaste(editSession)
                     .to(BlockVector3.at(location.getBlockX(), location.getBlockY(), location.getBlockZ()))
-                    .ignoreAirBlocks(true)
+                    .ignoreAirBlocks(false)
                     .build();
 
             Operations.complete(operation);
